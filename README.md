@@ -26,7 +26,13 @@ LayoutLMv3 transformer for primary spatial extraction, coupled with DocTR for OC
 * `ENABLE_REGEX_FALLBACK`
 
 ## Quick Start & Usage
-Submit a document image (PNG/PDF) to the pipeline to receive a strictly formatted JSON payload containing the extracted financial fields.
+1. Install dependencies: `pip install -r requirements.txt`
+2. Copy `.env.example` to `.env` (or edit the provided `.env`) to configure the model checkpoint, device, and confidence threshold.
+3. Run the extractor against an invoice image or PDF:
 
-## Testing & CI
-Evaluates extraction F1 scores against synthetic invoice datasets and validates the successful triggering of the regex fallback mechanism.
+```
+python main.py path/to/invoice.pdf
+python main.py path/to/invoice.png --output result.json --pretty
+```
+
+The pipeline runs DocTR OCR to extract words and bounding boxes, feeds them into a LayoutLM document-question-answering model to answer per-field questions (invoice number, dates, vendor, amounts, etc.), and falls back to deterministic regex heuristics for any field whose model confidence falls below `OCR_MIN_CONFIDENCE`. The result is written as JSON (to `OUTPUT_DIR` by default) and printed to stdout, with each field annotated with its value, confidence score, and extraction source (`layoutlm` or `regex`).
